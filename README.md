@@ -1,4 +1,4 @@
-# GarageHub – Garage Storage Marketplace (Expo/React Native)
+# GarageHub – Garage Storage Marketplace (Expo/React Native and Xano Backend)
 
 A mobile-first marketplace for renting out unused garage space. Built with Expo + React Native and Expo Router.
 
