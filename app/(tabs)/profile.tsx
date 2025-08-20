@@ -71,7 +71,7 @@ export default function ProfileScreen() {
   const profile = {
     name: 'Sarah Cunningham',
     location: 'Vancouver',
-    avatar: 'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=400'
+    avatar: 'local'
   };
 
   const [user, setUser] = React.useState<{ full_name?: string; name?: string; email?: string } | null>(null);
@@ -121,7 +121,16 @@ export default function ProfileScreen() {
     }
   };
 
-  const [avatarUri, setAvatarUri] = React.useState(profile.avatar);
+  const [avatarUri, setAvatarUri] = React.useState<string>(() => {
+    try {
+      // Use garage.png as the default avatar
+      // @ts-ignore Image is available in scope
+      const src = (Image as any).resolveAssetSource(require('../../assets/garage.png'));
+      return src?.uri || '';
+    } catch {
+      return '';
+    }
+  });
 
   const pickImage = async () => {
     try {
@@ -176,7 +185,7 @@ export default function ProfileScreen() {
         <View style={styles.unifiedContainer}>
           <View style={styles.headerCard}>
             <View style={styles.avatarContainer}>
-              <Image source={{ uri: avatarUri }} style={styles.headerAvatar} />
+              <Image source={avatarUri ? { uri: avatarUri } : require('../../assets/garage.png')} style={styles.headerAvatar} />
               <View style={{ position: 'absolute', right: -8, bottom: -8, flexDirection: 'row', gap: 8 }}>
                 <TouchableOpacity style={styles.cameraButton} onPress={takePhoto}>
                   <Camera size={20} color="#FFFFFF" />

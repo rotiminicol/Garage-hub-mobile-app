@@ -11,6 +11,7 @@ import Animated, {
 import { Camera, Upload, MapPin, DollarSign, Home, Car, ChevronLeft, ChevronRight, Check } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Logo from '@/components/Logo';
+import Starfield from '@/components/Starfield';
 import * as ImagePicker from 'expo-image-picker';
 import { useUI } from '@/contexts/UIProvider';
 
@@ -364,6 +365,7 @@ export default function AddListingScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <Starfield starColor="#000000" />
       <Animated.View entering={FadeInDown} style={styles.header}>
         <View style={styles.placeholder} />
         <Text style={styles.title}>Create Listing</Text>
@@ -411,7 +413,7 @@ export default function AddListingScreen() {
       <ScrollView
         style={styles.content}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 120 }}
+        contentContainerStyle={{ paddingBottom: 40 }}
       >
         {renderStep()}
 
@@ -459,7 +461,7 @@ export default function AddListingScreen() {
           <Logo size={24} />
           <Text style={styles.brandText}>GarageHub · Privacy · Terms</Text>
         </View>
-        <View style={{ height: 40 }} />
+        <View style={{ height: 8 }} />
       </ScrollView>
 
           </SafeAreaView>
@@ -841,9 +843,9 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     flexDirection: 'row',
-    padding: 16,
-    paddingBottom: 24,
-    gap: 16,
+    padding: 12,
+    paddingBottom: 16,
+    gap: 12,
     backgroundColor: '#FFFFFF',
     borderTopWidth: 1,
     borderTopColor: '#E5E7EB',

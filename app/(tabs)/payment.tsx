@@ -280,7 +280,13 @@ export default function PaymentScreen() {
                 </View>
                 <TouchableOpacity 
                   style={styles.primaryCta} 
-                  onPress={() => router.replace('/(tabs)/home')}
+                  onPress={() => {
+                    ui.showLoader('Taking you home...');
+                    setTimeout(() => {
+                      ui.hideLoader();
+                      router.replace('/(tabs)/home');
+                    }, 600);
+                  }}
                 >
                   <Text style={styles.primaryCtaText}>Go to Home</Text>
                 </TouchableOpacity>

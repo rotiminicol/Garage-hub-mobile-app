@@ -121,10 +121,10 @@ export default function SplashScreen() {
     textOpacity.value = withDelay(1550, withTiming(1, { duration: 600 }));
     textTranslateY.value = withDelay(1550, withSpring(0, { damping: 14, stiffness: 120 }));
 
-    // Navigate after a longer hold (6 seconds total)
+    // Navigate after ~4 seconds total
     setTimeout(() => {
       runOnJS(animateAndNavigate)();
-    }, 6000);
+    }, 4000);
   }, []);
 
   // Animated styles

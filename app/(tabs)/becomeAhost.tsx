@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { ChevronLeft } from 'lucide-react-native';
 import { router } from 'expo-router';
 
@@ -13,13 +13,19 @@ export default function BecomeHost() {
         <Text style={styles.title}>Become a Host</Text>
         <View style={styles.placeholder} />
       </View>
-      <View style={styles.content}>
-        <Text style={styles.sectionTitle}>Become a Host</Text>
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        <Text style={styles.sectionTitle}>Why host on GarageHub?</Text>
         <Text style={styles.sectionDescription}>
-          Learn how to become a host and list your space.
+          Earn money by renting out your extra storage space. It's safe, flexible, and simple.
         </Text>
-        {/* Add become host content here */}
-      </View>
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>How it works</Text>
+          <Text style={styles.item}>1. List your space with photos and details</Text>
+          <Text style={styles.item}>2. Approve booking requests</Text>
+          <Text style={styles.item}>3. Get paid monthly</Text>
+          <TouchableOpacity style={styles.cta}><View style={styles.ctaInner}><Text style={styles.ctaText}>Start listing</Text></View></TouchableOpacity>
+        </View>
+      </ScrollView>
     </View>
   );
 }
@@ -58,7 +64,14 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingVertical: 24,
+    gap: 16,
   },
+  card: { backgroundColor: '#FFFFFF', borderRadius: 16, borderWidth: 1, borderColor: '#E5E7EB', padding: 16, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 2 },
+  cardTitle: { fontSize: 18, fontWeight: '700', color: '#111111', marginBottom: 8 },
+  item: { color: '#111827', marginBottom: 8 },
+  cta: { borderRadius: 12, overflow: 'hidden', marginTop: 8 },
+  ctaInner: { backgroundColor: '#111111', alignItems: 'center', paddingVertical: 14, borderRadius: 12 },
+  ctaText: { color: '#FFFFFF', fontWeight: '700' },
   sectionTitle: {
     fontSize: 24,
     fontWeight: '700',

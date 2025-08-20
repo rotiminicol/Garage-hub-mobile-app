@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { ChevronLeft } from 'lucide-react-native';
 import { router } from 'expo-router';
 
@@ -13,13 +13,14 @@ export default function CancellationPolicy() {
         <Text style={styles.title}>Cancellation Policy</Text>
         <View style={styles.placeholder} />
       </View>
-      <View style={styles.content}>
-        <Text style={styles.sectionTitle}>Cancellation Policy</Text>
-        <Text style={styles.sectionDescription}>
-          View the cancellation policy details here.
-        </Text>
-        {/* Add cancellation policy content here */}
-      </View>
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        <Text style={styles.sectionTitle}>Flexible Policy</Text>
+        <View style={styles.card}>
+          <Text style={styles.item}>- Full refund up to 24 hours before booking start</Text>
+          <Text style={styles.item}>- 50% refund within 24 hours of start</Text>
+          <Text style={styles.item}>- No-show forfeits first month</Text>
+        </View>
+      </ScrollView>
     </View>
   );
 }
@@ -58,7 +59,10 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingVertical: 24,
+    gap: 16,
   },
+  card: { backgroundColor: '#FFFFFF', borderRadius: 16, borderWidth: 1, borderColor: '#E5E7EB', padding: 16, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 2 },
+  item: { color: '#111827', marginBottom: 8 },
   sectionTitle: {
     fontSize: 24,
     fontWeight: '700',

@@ -1,9 +1,10 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView } from 'react-native';
 import { ChevronLeft } from 'lucide-react-native';
 import { router } from 'expo-router';
 
 export default function Help() {
+  const [message, setMessage] = React.useState('');
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -13,13 +14,17 @@ export default function Help() {
         <Text style={styles.title}>Help</Text>
         <View style={styles.placeholder} />
       </View>
-      <View style={styles.content}>
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <Text style={styles.sectionTitle}>Help Center</Text>
         <Text style={styles.sectionDescription}>
-          Find support and resources here.
+          Browse FAQs or send us a message. We'll get back within 24h.
         </Text>
-        {/* Add help content here */}
-      </View>
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Contact support</Text>
+          <TextInput style={styles.textArea} placeholder="Describe your issue..." placeholderTextColor="#9CA3AF" multiline numberOfLines={6} value={message} onChangeText={setMessage} />
+          <TouchableOpacity style={styles.sendBtn}><View style={styles.sendBtnInner}><Text style={styles.sendText}>Send</Text></View></TouchableOpacity>
+        </View>
+      </ScrollView>
     </View>
   );
 }
@@ -58,7 +63,14 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingVertical: 24,
+    gap: 16,
   },
+  card: { backgroundColor: '#FFFFFF', borderRadius: 16, borderWidth: 1, borderColor: '#E5E7EB', padding: 16, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 2 },
+  cardTitle: { fontSize: 18, fontWeight: '700', color: '#111111', marginBottom: 8 },
+  textArea: { borderWidth: 1, borderColor: '#E5E7EB', borderRadius: 12, padding: 12, minHeight: 120, color: '#111827' },
+  sendBtn: { borderRadius: 12, overflow: 'hidden', marginTop: 12 },
+  sendBtnInner: { backgroundColor: '#111111', alignItems: 'center', paddingVertical: 14, borderRadius: 12 },
+  sendText: { color: '#FFFFFF', fontWeight: '700' },
   sectionTitle: {
     fontSize: 24,
     fontWeight: '700',

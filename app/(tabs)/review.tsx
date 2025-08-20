@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { ChevronLeft } from 'lucide-react-native';
 import { router } from 'expo-router';
 
@@ -13,13 +13,14 @@ export default function Reviews() {
         <Text style={styles.title}>Reviews</Text>
         <View style={styles.placeholder} />
       </View>
-      <View style={styles.content}>
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <Text style={styles.sectionTitle}>Your Reviews</Text>
         <Text style={styles.sectionDescription}>
-          View your reviews and ratings here.
+          See feedback you've received as a host or guest.
         </Text>
-        {/* Add reviews content here */}
-      </View>
+        <View style={styles.card}><Text>“Great host, very responsive.” · 5★</Text></View>
+        <View style={styles.card}><Text>“Secure and clean space.” · 5★</Text></View>
+      </ScrollView>
     </View>
   );
 }
@@ -58,7 +59,9 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingVertical: 24,
+    gap: 16,
   },
+  card: { backgroundColor: '#FFFFFF', borderRadius: 12, borderWidth: 1, borderColor: '#E5E7EB', padding: 12 },
   sectionTitle: {
     fontSize: 24,
     fontWeight: '700',

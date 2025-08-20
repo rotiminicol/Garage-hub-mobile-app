@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { ChevronLeft, Bell } from 'lucide-react-native';
 import { router } from 'expo-router';
 
@@ -13,7 +13,7 @@ export default function Notifications() {
         <Text style={styles.title}>Notifications</Text>
         <View style={styles.placeholder} />
       </View>
-      <View style={styles.content}>
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.sectionHeader}>
           <Bell size={18} color="#111111" />
           <Text style={styles.sectionTitle}>Your Notifications</Text>
@@ -21,8 +21,9 @@ export default function Notifications() {
         <Text style={styles.sectionDescription}>
           Manage your notification preferences and view recent alerts here.
         </Text>
-        {/* Add notifications list and settings here */}
-      </View>
+        <View style={styles.card}><Text>Booking confirmed · Today</Text></View>
+        <View style={styles.card}><Text>Price drop for a saved listing · Yesterday</Text></View>
+      </ScrollView>
     </View>
   );
 }
@@ -78,4 +79,5 @@ const styles = StyleSheet.create({
     color: '#6B7280',
     lineHeight: 24,
   },
+  card: { backgroundColor: '#FFFFFF', borderRadius: 12, borderWidth: 1, borderColor: '#E5E7EB', padding: 12, marginTop: 8 },
 });

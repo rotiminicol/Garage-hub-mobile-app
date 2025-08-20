@@ -483,7 +483,7 @@ const styles = StyleSheet.create({
   },
   grid: {
     gap: 12,
-    paddingBottom: 100,
+    paddingBottom: 40,
   },
   gridItem: {
     width: '100%',
@@ -550,7 +550,7 @@ const styles = StyleSheet.create({
   },
   list: {
     gap: 16,
-    paddingBottom: 100,
+    paddingBottom: 40,
   },
   listItem: {
     flexDirection: 'row',

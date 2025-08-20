@@ -17,63 +17,97 @@ export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortOption, setSortOption] = useState('');
 
+  // Use the full asset list and avoid repeats across sections to keep images/details consistent
   const listingImages = [
+    require('../../assets/listing-images/aldo-festevole-l-URrPJLp8w-unsplash.jpg'),
     require('../../assets/listing-images/alex-suprun-AHnhdjyTNGM-unsplash.jpg'),
+    require('../../assets/listing-images/alex-suprun-d304gprGG5k-unsplash.jpg'),
     require('../../assets/listing-images/alexandra-gorn-JIUjvqe2ZHg-unsplash.jpg'),
-    require('../../assets/listing-images/point3d-commercial-imaging-ltd-jhJ6WIGW_80-unsplash.jpg'),
-    require('../../assets/listing-images/point3d-commercial-imaging-ltd-SP4oH94qOCU-unsplash.jpg'),
-    require('../../assets/listing-images/point3d-commercial-imaging-ltd-X_JXnSBKOO4-unsplash.jpg'),
-    require('../../assets/listing-images/kenny-eliason-mGZX2MOPR-s-unsplash.jpg'),
+    require('../../assets/listing-images/arlind-photography-XW38h9JRL_I-unsplash.jpg'),
     require('../../assets/listing-images/avery-klein-JaXs8Tk5Iww-unsplash.jpg'),
     require('../../assets/listing-images/barthelemy-de-mazenod-DI7E79H3joQ-unsplash.jpg'),
     require('../../assets/listing-images/brandi-alexandra-MgJPU2da8jY-unsplash.jpg'),
     require('../../assets/listing-images/caleb-rogers-SGLh5-clL4E-unsplash.jpg'),
+    require('../../assets/listing-images/claudio-poggio-FeK8zDytXDA-unsplash.jpg'),
+    require('../../assets/listing-images/claudio-schwarz-07r4q_MX6ik-unsplash.jpg'),
+    require('../../assets/listing-images/dillon-kydd-3Ignkeds3w8-unsplash.jpg'),
+    require('../../assets/listing-images/dillon-kydd-XGvwt544g8k-unsplash.jpg'),
+    require('../../assets/listing-images/estefania-ruiz-m1kvhaIw3-8-unsplash.jpg'),
+    require('../../assets/listing-images/jakob-rosen-JUkrwViCvyE-unsplash.jpg'),
+    require('../../assets/listing-images/jose-rago-LNlJ0WZHiEs-unsplash.jpg'),
+    require('../../assets/listing-images/josh-mccausland-BBSk8kPRNw4-unsplash.jpg'),
+    require('../../assets/listing-images/kam-idris-_HqHX3LBN18-unsplash.jpg'),
+    require('../../assets/listing-images/kate-trifo-iXSD1nM_qQo-unsplash.jpg'),
+    require('../../assets/listing-images/keenan-dunn-Y0-OfYQMDlM-unsplash.jpg'),
+    require('../../assets/listing-images/kellen-riggin-JZ_HBh_l8F8-unsplash.jpg'),
+    require('../../assets/listing-images/kenny-eliason-mGZX2MOPR-s-unsplash.jpg'),
+    require('../../assets/listing-images/kevin-schmid-42MP7b-AJ-Q-unsplash.jpg'),
+    require('../../assets/listing-images/kevin-wolf-3AbwSH1y9dc-unsplash.jpg'),
+    require('../../assets/listing-images/mad-visual-hAZGSiPkfGY-unsplash.jpg'),
+    require('../../assets/listing-images/marten-bjork-Z2EgLCJob40-unsplash.jpg'),
+    require('../../assets/listing-images/meg-ikvL3QiH9AY-unsplash.jpg'),
+    require('../../assets/listing-images/naomi-hebert-MP0bgaS_d1c-unsplash.jpg'),
+    require('../../assets/listing-images/outsite-co-R-LK3sqLiBw-unsplash.jpg'),
+    require('../../assets/listing-images/point3d-commercial-imaging-ltd-jhJ6WIGW_80-unsplash.jpg'),
+    require('../../assets/listing-images/point3d-commercial-imaging-ltd-SP4oH94qOCU-unsplash.jpg'),
+    require('../../assets/listing-images/point3d-commercial-imaging-ltd-X_JXnSBKOO4-unsplash.jpg'),
+    require('../../assets/listing-images/priscilla-du-preez-tjUD8rg38po-unsplash.jpg'),
+    require('../../assets/listing-images/ryunosuke-kikuno-pyZM2RYCwKE-unsplash.jpg'),
+    require('../../assets/listing-images/sean-foster-lcJ34i8m7cM-unsplash.jpg'),
+    require('../../assets/listing-images/steve-johnson-S0j-5wSN3YQ-unsplash.jpg'),
+    require('../../assets/listing-images/theo-TlWM_glSTw0-unsplash.jpg'),
+    require('../../assets/listing-images/timothy-buck-psrloDbaZc8-unsplash.jpg'),
+    require('../../assets/listing-images/viktor-theo-1rw3l343EDM-unsplash.jpg'),
+    require('../../assets/listing-images/vivint-solar-HASgVRE48KY-unsplash.jpg'),
+    require('../../assets/listing-images/yucel-moran-iYtsRY32szw-unsplash.jpg'),
   ];
 
-  // Generate consistent listings with proper details
-  const generateListings = (count: number, section: 'exclusive' | 'hub') => {
-    return Array.from({ length: count }, (_, index) => {
-      const imageIndex = index % listingImages.length;
-      const storageSize = Math.floor(Math.random() * 100 + 50); // Storage size in sq ft
-      const categoryIndex = Math.floor(Math.random() * categories.length);
-      const category = categories[categoryIndex];
-      const price = section === 'exclusive' ? 
-        100 + Math.floor(Math.random() * 150) : 
-        50 + Math.floor(Math.random() * 100);
-      
-      const locations = [
-        'Victoria Island, Lagos',
-        'Ikoyi, Lagos',
-        'Lekki, Lagos',
-        'Abuja Central',
-        'Garki, Abuja',
-        'Port Harcourt',
-        'Kano City',
-        'Ibadan',
-        'Enugu',
-        'Calabar'
-      ];
-      
+  // Deterministic listings mapped from assets to keep cards and details aligned
+  const buildListingsFromAssets = (assets: any[], section: 'exclusive' | 'hub', startIndex: number) => {
+    const locations = [
+      'Victoria Island, Lagos',
+      'Ikoyi, Lagos',
+      'Lekki, Lagos',
+      'Abuja Central',
+      'Garki, Abuja',
+      'Port Harcourt',
+      'Kano City',
+      'Ibadan',
+      'Enugu',
+      'Calabar'
+    ];
+    return assets.map((_, i) => {
+      const idx = startIndex + i;
+      const category = categories[(idx) % categories.length];
+      const storageSize = 120 + (idx % 12) * 10;
+      const base = section === 'exclusive' ? 140 : 90;
+      const price = base + (idx % 8) * 10;
+      const rating = 4 + ((idx % 10) / 20);
       return {
-        id: `${section}-${index + 1}`,
-        image: listingImages[imageIndex],
-        price: price,
+        id: `${section}-${idx + 1}`,
+        image: assets[i],
+        price,
         title: `${category} Space ${storageSize} sq ft`,
         description: `Secure ${category.toLowerCase()} with ${storageSize} sq ft, 24/7 access, and premium security features`,
-        rating: parseFloat((Math.random() * 2 + 3).toFixed(1)),
-        reviews: Math.floor(Math.random() * 100 + 50),
-        location: locations[index % locations.length],
+        rating: parseFloat(rating.toFixed(1)),
+        reviews: 60 + (idx % 120),
+        location: locations[idx % locations.length],
         size: `${storageSize} sq ft`,
-        access: Math.random() > 0.5 ? '24/7 Access' : 'Scheduled Access',
+        access: (idx % 2 === 0) ? '24/7 Access' : 'Scheduled Access',
         amenities: ['Security Cameras', 'Climate Control', 'Lighting', 'Shelving', 'Lockable'],
-        imageIndex: imageIndex,
-        category: category
+        imageIndex: idx,
+        category,
       };
     });
   };
 
-  const allGarageHubExclusive = generateListings(10, 'exclusive');
-  const allHubListings = generateListings(10, 'hub');
+  // Split the master image list into non-overlapping sections
+  const exclusiveAssets = listingImages.slice(0, 12);
+  const hubAssets = listingImages.slice(12, 24);
+  const exploreAssets = listingImages.slice(24, 36);
+
+  const allGarageHubExclusive = buildListingsFromAssets(exclusiveAssets, 'exclusive', 0);
+  const allHubListings = buildListingsFromAssets(hubAssets, 'hub', 12);
 
   const nigerianStates = [
     { state: 'Lagos', count: 150 },
@@ -89,7 +123,7 @@ export default function HomePage() {
   ].map((item, index) => ({
     ...item,
     id: `explore-${index + 1}`,
-    image: listingImages[index % listingImages.length],
+    image: exploreAssets[index % exploreAssets.length],
     location: `${item.state}, Nigeria`,
     title: `Storage Space in ${item.state}`,
     price: 50 + Math.floor(Math.random() * 100),
@@ -97,7 +131,7 @@ export default function HomePage() {
     reviews: Math.floor(Math.random() * 100 + 50),
     description: `Secure storage facilities in ${item.state} with 24/7 access and premium features`,
     size: `${150 + Math.floor(Math.random() * 250)} sq ft`,
-    imageIndex: index % listingImages.length,
+    imageIndex: 24 + (index % exploreAssets.length),
     category: 'All Storage'
   }));
 
@@ -488,13 +522,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   scrollContent: {
-    paddingBottom: 40,
+    paddingBottom: 16,
   },
   topSpacer: {
     height: 24,
   },
   bottomSpacer: {
-    height: 48,
+    height: 8,
   },
   searchContainer: {
     flexDirection: 'row',
@@ -675,7 +709,7 @@ const styles = StyleSheet.create({
   },
   largeGridItem: {
     width: windowWidth - 40,
-    height: windowHeight * 0.45,
+    height: windowHeight * 0.42,
     borderRadius: 16,
     overflow: 'hidden',
     backgroundColor: '#F3F4F6',
@@ -687,8 +721,8 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   mediumGridItem: {
-    width: windowWidth * 0.7,
-    height: windowHeight * 0.35,
+    width: windowWidth * 0.68,
+    height: windowHeight * 0.32,
     borderRadius: 16,
     overflow: 'hidden',
     backgroundColor: '#F3F4F6',
@@ -701,7 +735,7 @@ const styles = StyleSheet.create({
   },
   gridItem: {
     width: (windowWidth - 52) / 2,
-    height: 240,
+    height: 220,
     borderRadius: 12,
     overflow: 'hidden',
     backgroundColor: '#F3F4F6',

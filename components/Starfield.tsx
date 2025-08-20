@@ -15,10 +15,12 @@ export default function Starfield({
   starCount = 80,
   minSize = 1,
   maxSize = 2.2,
+  starColor = '#FFFFFF',
 }: {
   starCount?: number;
   minSize?: number;
   maxSize?: number;
+  starColor?: string;
 }) {
   const stars: Star[] = useMemo(() => {
     return new Array(starCount).fill(0).map(() => ({
@@ -32,13 +34,13 @@ export default function Starfield({
   return (
     <View pointerEvents="none" style={StyleSheet.absoluteFill}>
       {stars.map((star, index) => (
-        <Star key={index} x={star.x} y={star.y} size={star.size} delay={star.delay} />
+        <Star key={index} x={star.x} y={star.y} size={star.size} delay={star.delay} starColor={starColor} />
       ))}
     </View>
   );
 }
 
-function Star({ x, y, size, delay }: { x: number; y: number; size: number; delay: number }) {
+function Star({ x, y, size, delay, starColor }: { x: number; y: number; size: number; delay: number; starColor: string }) {
   const opacity = useSharedValue(0.2 + Math.random() * 0.5);
 
   useEffect(() => {
@@ -64,6 +66,7 @@ function Star({ x, y, size, delay }: { x: number; y: number; size: number; delay
           width: size,
           height: size,
           borderRadius: size / 2,
+          backgroundColor: starColor,
         },
       ]}
     />
@@ -73,7 +76,6 @@ function Star({ x, y, size, delay }: { x: number; y: number; size: number; delay
 const styles = StyleSheet.create({
   star: {
     position: 'absolute',
-    backgroundColor: '#FFFFFF',
   },
 });
 

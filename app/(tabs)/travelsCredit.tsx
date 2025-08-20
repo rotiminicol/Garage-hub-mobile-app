@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { ChevronLeft } from 'lucide-react-native';
 import { router } from 'expo-router';
 
@@ -13,13 +13,12 @@ export default function TravelCredits() {
         <Text style={styles.title}>Travel Credits</Text>
         <View style={styles.placeholder} />
       </View>
-      <View style={styles.content}>
-        <Text style={styles.sectionTitle}>Travel Credits</Text>
-        <Text style={styles.sectionDescription}>
-          View and manage your travel credits here.
-        </Text>
-        {/* Add travel credits content here */}
-      </View>
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        <Text style={styles.sectionTitle}>Balance</Text>
+        <View style={styles.card}><Text style={styles.balance}>$125.00</Text><Text style={styles.muted}>Use on your next booking</Text></View>
+        <Text style={styles.sectionTitle}>Recent activity</Text>
+        <View style={styles.card}><Text>+ $25 referral · Aug 2</Text><Text>- $50 booking · Jul 23</Text></View>
+      </ScrollView>
     </View>
   );
 }
@@ -58,7 +57,11 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingVertical: 24,
+    gap: 16,
   },
+  card: { backgroundColor: '#FFFFFF', borderRadius: 16, borderWidth: 1, borderColor: '#E5E7EB', padding: 16, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 2, gap: 8 },
+  balance: { fontSize: 28, fontWeight: '800', color: '#111111' },
+  muted: { color: '#6B7280' },
   sectionTitle: {
     fontSize: 24,
     fontWeight: '700',

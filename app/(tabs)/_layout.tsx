@@ -105,13 +105,13 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const renderIcon = (route: any, index: number) => {
     const { options } = descriptors[route.key];
     const isFocused = state.index === state.routes.indexOf(route);
-    const tintColor = isFocused ? activeColor : inactiveColor;
+    const tintColor = isFocused ? '#FFFFFF' : inactiveColor;
     const source = iconSourceFor(route.name);
     const label = getTabLabel(route.name);
 
     // Animation for elevation effect
     const scaleAnim = useRef(new Animated.Value(isFocused ? 1.1 : 1)).current;
-    const translateYAnim = useRef(new Animated.Value(isFocused ? -12 : 0)).current;
+    const translateYAnim = useRef(new Animated.Value(isFocused ? -14 : 0)).current;
 
     useEffect(() => {
       Animated.parallel([
@@ -139,7 +139,7 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
         style={[styles.tabItem, isFocused && styles.tabItemActive]}
         activeOpacity={0.8}
       >
-        <Animated.View style={[styles.iconContainer, {
+        <Animated.View style={[styles.iconContainer, isFocused && styles.iconContainerActive, {
           transform: [
             { scale: scaleAnim },
             { translateY: translateYAnim },
@@ -192,13 +192,20 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   tabItemActive: {
-    backgroundColor: '#F5F5F5',
-    borderRadius: 12,
-    paddingVertical: 8,
+    backgroundColor: '#111111',
+    borderRadius: 14,
+    paddingVertical: 10,
+    paddingHorizontal: 6,
   },
   iconContainer: {
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  iconContainerActive: {
+    shadowColor: '#000',
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 3 },
   },
   iconImg: {
     width: 24,
@@ -218,6 +225,6 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   dotActive: {
-    backgroundColor: '#111111',
+    backgroundColor: '#FFFFFF',
   },
 });

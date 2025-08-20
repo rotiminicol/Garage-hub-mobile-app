@@ -1,9 +1,11 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Switch } from 'react-native';
 import { ChevronLeft, Settings as SettingsIcon } from 'lucide-react-native';
 import { router } from 'expo-router';
 
 export default function Settings() {
+  const [darkMode, setDarkMode] = React.useState(false);
+  const [push, setPush] = React.useState(true);
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -21,7 +23,14 @@ export default function Settings() {
         <Text style={styles.sectionDescription}>
           Configure your preferences and account settings here.
         </Text>
-        {/* Add settings form here */}
+        <View style={styles.rowBetween}>
+          <Text style={styles.itemText}>Dark mode</Text>
+          <Switch value={darkMode} onValueChange={setDarkMode} />
+        </View>
+        <View style={styles.rowBetween}>
+          <Text style={styles.itemText}>Push notifications</Text>
+          <Switch value={push} onValueChange={setPush} />
+        </View>
       </View>
     </View>
   );
@@ -78,4 +87,6 @@ const styles = StyleSheet.create({
     color: '#6B7280',
     lineHeight: 24,
   },
+  rowBetween: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: '#F3F4F6' },
+  itemText: { color: '#111827', fontSize: 16 },
 });
