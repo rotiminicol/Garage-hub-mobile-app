@@ -11,6 +11,8 @@ import Animated, {
 import { Camera, Upload, MapPin, DollarSign, Home, Car, ChevronLeft, ChevronRight, Check } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Logo from '@/components/Logo';
+import * as ImagePicker from 'expo-image-picker';
+import { useUI } from '@/contexts/UIProvider';
 
 const { width, height } = Dimensions.get('window');
 
@@ -31,6 +33,7 @@ const listingAssets = [
 ];
 
 export default function AddListingScreen() {
+  const ui = useUI();
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState({
     title: '',
@@ -40,6 +43,7 @@ export default function AddListingScreen() {
     location: '',
     type: 'residential',
   });
+  const [photos, setPhotos] = useState<string[]>([]);
 
   const progressWidth = useSharedValue(0);
   const buttonScale = useSharedValue(1);
@@ -85,6 +89,38 @@ export default function AddListingScreen() {
     updateProgress(currentStep);
   }, []);
 
+  const takePhoto = async () => {
+    try {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== 'granted') {
+        ui.showError('Camera permission is required to take photos.', 'Permission required');
+        return;
+      }
+      const result = await ImagePicker.launchCameraAsync({ allowsEditing: true, aspect: [4,3], quality: 0.8 });
+      if (!result.canceled && result.assets?.length) {
+        setPhotos(prev => [...prev, result.assets[0].uri]);
+      }
+    } catch (e) {
+      ui.showError('Could not open camera.', 'Error');
+    }
+  };
+
+  const pickFromGallery = async () => {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        ui.showError('Photo library permission is required to upload photos.', 'Permission required');
+        return;
+      }
+      const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, allowsMultipleSelection: true, quality: 0.8 });
+      if (!result.canceled && result.assets?.length) {
+        setPhotos(prev => [...prev, ...result.assets.map(a => a.uri)]);
+      }
+    } catch (e) {
+      ui.showError('Could not open gallery.', 'Error');
+    }
+  };
+
   const PhotoStep = () => (
     <Animated.View entering={FadeInDown.delay(200)} style={styles.stepContainer}>
       <Text style={styles.stepTitle}>Add Photos</Text>
@@ -97,6 +133,7 @@ export default function AddListingScreen() {
           style={styles.photoUpload}
           onPressIn={handleButtonPressIn}
           onPressOut={handleButtonPressOut}
+          onPress={takePhoto}
         >
           <Animated.View style={[styles.photoUploadInner, animatedButtonStyle]}>
             <Camera size={28} color="#111111" />
@@ -108,6 +145,7 @@ export default function AddListingScreen() {
           style={styles.photoUpload}
           onPressIn={handleButtonPressIn}
           onPressOut={handleButtonPressOut}
+          onPress={pickFromGallery}
         >
           <Animated.View style={[styles.photoUploadInner, animatedButtonStyle]}>
             <Upload size={28} color="#111111" />
@@ -117,9 +155,9 @@ export default function AddListingScreen() {
       </View>
       
       <View style={styles.photoPreview}>
-        {[0,1,2,3,4,5].map((idx, i) => (
-          <Animated.View key={idx} entering={FadeIn.delay(300 + i * 100)}>
-            <Image source={listingAssets[idx % listingAssets.length]} style={styles.previewImage} />
+        {(photos.length ? photos : [0,1,2,3,4,5]).map((it, i) => (
+          <Animated.View key={`${it}-${i}`} entering={FadeIn.delay(300 + i * 100)}>
+            <Image source={typeof it === 'string' ? { uri: it } : listingAssets[(it as number) % listingAssets.length]} style={styles.previewImage} />
           </Animated.View>
         ))}
       </View>
@@ -297,6 +335,7 @@ export default function AddListingScreen() {
         style={styles.publishButton}
         onPressIn={handleButtonPressIn}
         onPressOut={handleButtonPressOut}
+        onPress={() => ui.showSuccess('Your listing has been published successfully!', 'Published')}
       >
         <LinearGradient
           colors={['#374151', '#1F2937']}
@@ -392,7 +431,7 @@ export default function AddListingScreen() {
           )}
           <TouchableOpacity
             style={[styles.navButton, styles.nextButton]}
-            onPress={currentStep < steps.length - 1 ? nextStep : () => {}}
+            onPress={currentStep < steps.length - 1 ? nextStep : () => ui.showSuccess('Your listing has been published successfully!', 'Published')}
             onPressIn={handleButtonPressIn}
             onPressOut={handleButtonPressOut}
           >
@@ -865,5 +904,8 @@ const styles = StyleSheet.create({
     color: '#6B7280',
     fontSize: 12,
     textAlign: 'center',
+  },
+  row: {
+    flexDirection: 'row',
   },
 });

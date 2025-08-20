@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, Dimensions, Clipboard, Image } from 'react-native';
 import { ArrowLeft, CreditCard, Copy } from 'lucide-react-native';
 import { router } from 'expo-router';
 import Animated, { FadeInDown, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import { useUI } from '@/contexts/UIProvider';
 
 const { width, height } = Dimensions.get('window');
 
 export default function PaymentScreen() {
+  const ui = useUI();
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'bank'>('card');
   const [name, setName] = useState('');
   const [card, setCard] = useState('');
@@ -48,11 +50,13 @@ export default function PaymentScreen() {
     // Optionally, you could add a toast notification here for feedback
   };
 
-  const Spinner = () => (
-    <View style={styles.spinnerWrap}>
-      <Animated.View entering={FadeInDown} style={styles.spinner} />
-    </View>
-  );
+  useEffect(() => {
+    if (stage === 'processing') {
+      ui.showLoader('Processing payment...');
+      const t = setTimeout(() => ui.hideLoader(), 800);
+      return () => clearTimeout(t);
+    }
+  }, [stage]);
 
   return (
     <View style={styles.container}>
@@ -221,7 +225,6 @@ export default function PaymentScreen() {
             {stage === 'processing' && (
               <View style={styles.processCard}>
                 <Text style={styles.processTitle}>Confirming your payment…</Text>
-                <Spinner />
                 <Text style={styles.processSub}>
                   This may take a few seconds. We are verifying your payment details with our secure payment gateway. 
                   Please do not close this window or navigate away while we process your transaction. 

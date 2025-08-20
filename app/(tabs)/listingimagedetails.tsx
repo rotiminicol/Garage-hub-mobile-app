@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, TextInput, Dimensions } from 'react-native';
 import { ArrowLeft, MapPin, Star, Shield, Wifi, Car, Lock, Clock, Calendar, Ruler, Users } from 'lucide-react-native';
 import { useLocalSearchParams, router } from 'expo-router';
+import { useUI } from '@/contexts/UIProvider';
 import Animated, { FadeIn, FadeInDown, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 
 // Mirror the same asset order used in index/search screens
@@ -52,6 +53,7 @@ const listingAssets = [
 const { width } = Dimensions.get('window');
 
 export default function ListingImageDetails() {
+  const ui = useUI();
   const params = useLocalSearchParams<{
     id?: string; title?: string; price?: string; location?: string; rating?: string; images?: string; imagesIdx?: string;
   }>();
@@ -205,7 +207,11 @@ export default function ListingImageDetails() {
           <TouchableOpacity
             style={styles.primaryBtn}
             activeOpacity={0.95}
-            onPress={() => router.push('/(tabs)/payment')}
+            onPress={() => {
+              ui.showLoader('Preparing payment...');
+              setTimeout(() => ui.hideLoader(), 500);
+              router.push('/(tabs)/payment');
+            }}
             onPressIn={handleButtonPressIn}
             onPressOut={handleButtonPressOut}
           >

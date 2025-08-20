@@ -2,12 +2,14 @@ import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Image, SafeAreaView, Dimensions, FlatList } from 'react-native';
 import { Search, Filter, Bell, MapPin, Star, ChevronDown } from 'lucide-react-native';
 import { router } from 'expo-router';
+import { useUI } from '@/contexts/UIProvider';
 import { LinearGradient } from 'expo-linear-gradient';
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
 export default function HomePage() {
+  const ui = useUI();
   const categories = ['All Storage', 'Small Garage', 'Large Garage', 'Secure Storage'];
   const [selectedCategory, setSelectedCategory] = useState('All Storage');
   const [showFilters, setShowFilters] = useState(false);
@@ -29,7 +31,7 @@ export default function HomePage() {
   ];
 
   // Generate consistent listings with proper details
-  const generateListings = (count, section) => {
+  const generateListings = (count: number, section: 'exclusive' | 'hub') => {
     return Array.from({ length: count }, (_, index) => {
       const imageIndex = index % listingImages.length;
       const storageSize = Math.floor(Math.random() * 100 + 50); // Storage size in sq ft
@@ -100,7 +102,8 @@ export default function HomePage() {
   }));
 
   // Filter and sort listings based on search, category, and sort option
-  const filterListings = (listings) => {
+  type Listing = ReturnType<typeof generateListings>[number];
+  const filterListings = (listings: Listing[]) => {
     let filtered = listings;
 
     // Filter by category
@@ -120,13 +123,13 @@ export default function HomePage() {
     // Sort listings
     switch (sortOption) {
       case 'price-low':
-        filtered.sort((a, b) => a.price - b.price);
+        filtered.sort((a: Listing, b: Listing) => a.price - b.price);
         break;
       case 'price-high':
-        filtered.sort((a, b) => b.price - a.price);
+        filtered.sort((a: Listing, b: Listing) => b.price - a.price);
         break;
       case 'rating-high':
-        filtered.sort((a, b) => b.rating - a.rating);
+        filtered.sort((a: Listing, b: Listing) => b.rating - a.rating);
         break;
       default:
         break;
@@ -143,7 +146,9 @@ export default function HomePage() {
     allHubListings, selectedCategory, searchQuery, sortOption
   ]);
 
-  const handleCardPress = (item) => {
+  const handleCardPress = (item: any) => {
+    ui.showLoader('Loading details...');
+    setTimeout(() => ui.hideLoader(), 500);
     router.push({
       pathname: '/listingimagedetails',
       params: {
@@ -162,25 +167,25 @@ export default function HomePage() {
     });
   };
 
-  const handleExploreCardPress = (item) => {
+  const handleExploreCardPress = (item: any) => {
     router.push('/search');
   };
 
-  const handleSeeAllPress = () => {
+  const handleSeeAllPress = (): void => {
     router.push('/search');
   };
 
-  const handleSortOptionPress = (option) => {
+  const handleSortOptionPress = (option: string) => {
     setSortOption(option);
     setShowFilters(false);
   };
 
-  const handleCategoryPress = (category) => {
+  const handleCategoryPress = (category: string) => {
     setSelectedCategory(category);
     setSearchQuery('');
   };
 
-  const renderListingItem = ({ item }) => (
+  const renderListingItem = ({ item }: { item: any }) => (
     <TouchableOpacity 
       style={styles.largeGridItem}
       onPress={() => handleCardPress(item)}
@@ -207,7 +212,7 @@ export default function HomePage() {
     </TouchableOpacity>
   );
 
-  const renderHubItem = ({ item }) => (
+  const renderHubItem = ({ item }: { item: any }) => (
     <TouchableOpacity 
       style={styles.gridItem}
       onPress={() => handleCardPress(item)}
@@ -234,7 +239,7 @@ export default function HomePage() {
     </TouchableOpacity>
   );
 
-  const renderStateItem = ({ item }) => (
+  const renderStateItem = ({ item }: { item: any }) => (
     <TouchableOpacity 
       style={styles.mediumGridItem}
       onPress={() => handleExploreCardPress(item)}
@@ -459,29 +464,16 @@ export default function HomePage() {
         </View>
 
         {/* Footer */}
-        <View style={styles.footer}>
-          <View style={styles.footerContent}>
-            <View style={styles.footerBrand}>
-              <Image 
-                source={require('../../assets/house.png')} 
-                style={styles.footerLogo}
-                resizeMode="contain"
-              />
-              <Text style={styles.footerBrandText}>GarageHub</Text>
-            </View>
-            <View style={styles.footerLinks}>
-              <TouchableOpacity>
-                <Text style={styles.footerLink}>Privacy</Text>
-              </TouchableOpacity>
-              <Text style={styles.footerSeparator}>·</Text>
-              <TouchableOpacity>
-                <Text style={styles.footerLink}>Terms</Text>
-              </TouchableOpacity>
-            </View>
+        <View style={styles.footerAlt}>
+          <View style={styles.footerBrandAlt}>
+            <Image source={require('../../assets/house.png')} style={styles.footerLogo} resizeMode="contain" />
+            <Text style={styles.footerBrandTextAlt}>GarageHub</Text>
           </View>
-          <Text style={styles.footerCopyright}>
-            © 2024 GarageHub. All rights reserved.
-          </Text>
+          <View style={styles.footerLinksAlt}>
+            <TouchableOpacity><Text style={styles.footerLinkAlt}>Privacy</Text></TouchableOpacity>
+            <Text style={styles.footerSeparatorAlt}>·</Text>
+            <TouchableOpacity><Text style={styles.footerLinkAlt}>Terms</Text></TouchableOpacity>
+          </View>
         </View>
 
         <View style={styles.bottomSpacer} />
@@ -782,6 +774,18 @@ const styles = StyleSheet.create({
     borderColor: '#E5E7EB',
     backgroundColor: '#F9FAFB',
   },
+  footerAlt: {
+    marginTop: 40,
+    paddingTop: 24,
+    paddingBottom: 24,
+    paddingHorizontal: 20,
+    borderTopWidth: 1,
+    borderColor: '#E5E7EB',
+    backgroundColor: '#F9FAFB',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
   footerContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -789,6 +793,11 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   footerBrand: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  footerBrandAlt: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
@@ -802,7 +811,17 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#1F2937',
   },
+  footerBrandTextAlt: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1F2937',
+  },
   footerLinks: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  footerLinksAlt: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
@@ -812,7 +831,16 @@ const styles = StyleSheet.create({
     color: '#6B7280',
     fontWeight: '500',
   },
+  footerLinkAlt: {
+    fontSize: 14,
+    color: '#6B7280',
+    fontWeight: '500',
+  },
   footerSeparator: {
+    fontSize: 14,
+    color: '#9CA3AF',
+  },
+  footerSeparatorAlt: {
     fontSize: 14,
     color: '#9CA3AF',
   },

@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Image, Dimensions, SafeAreaView, KeyboardAvoidingView, Platform } from 'react-native';
 import Animated, { useAnimatedStyle, withTiming, withRepeat, useSharedValue } from 'react-native-reanimated';
 import { ArrowRight, Phone, Video, MoreHorizontal, Paperclip, Smile, Mic, Check, ArrowLeft, Plus } from 'lucide-react-native';
@@ -66,13 +66,14 @@ export default function MessagesScreen() {
     },
   ];
 
-  const messages = [
+  const [messages, setMessages] = useState([
     { id: 1, text: "Hi! I'm interested in your downtown storage space.", sender: 'them', time: '10:30 AM' },
     { id: 2, text: "Hello! Yes, it's still available. Would you like to know more details?", sender: 'me', time: '10:32 AM' },
     { id: 3, text: 'That would be great! What are the dimensions and security features?', sender: 'them', time: '10:35 AM' },
     { id: 4, text: "It's 300 sq ft with 24/7 monitoring, keypad access, and climate control.", sender: 'me', time: '10:36 AM' },
     { id: 5, text: 'Perfect! Is the space still available for next month?', sender: 'them', time: '10:38 AM' },
-  ];
+  ] as Array<{ id: number; text: string; sender: 'me' | 'them'; time: string }>);
+  const scrollRef = useRef<ScrollView | null>(null);
 
   const filteredConversations = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -125,9 +126,17 @@ export default function MessagesScreen() {
   const onSendPressOut = () => { sendScale.value = withTiming(1, { duration: 120 }); };
 
   const sendMessage = () => {
-    if (newMessage.trim()) {
-      setNewMessage('');
-    }
+    const text = newMessage.trim();
+    if (!text) return;
+    const now = new Date();
+    const hh = now.getHours();
+    const mm = now.getMinutes().toString().padStart(2, '0');
+    const ampm = hh >= 12 ? 'PM' : 'AM';
+    const hour12 = ((hh + 11) % 12) + 1;
+    const timeLabel = `${hour12}:${mm} ${ampm}`;
+    setMessages(prev => [...prev, { id: prev.length + 1, text, sender: 'me', time: timeLabel }]);
+    setNewMessage('');
+    setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 50);
   };
 
   const ChatList = () => (
@@ -229,6 +238,7 @@ export default function MessagesScreen() {
             style={styles.messagesContainer} 
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.messagesContent}
+            ref={scrollRef as any}
           >
             {/* Date separator */}
             <View style={styles.dateChip}><Text style={styles.dateChipText}>Today</Text></View>

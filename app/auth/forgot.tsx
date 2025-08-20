@@ -1,12 +1,15 @@
 import React, { useRef, useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, Alert } from 'react-native';
 import Animated, { useSharedValue, withTiming, useAnimatedStyle } from 'react-native-reanimated';
-import { router } from 'expo-router';
+import { router, useNavigation } from 'expo-router';
 import { Mail, ArrowLeft } from 'lucide-react-native';
 import Logo from '@/components/Logo';
 import { requestPasswordReset } from '@/services/auth';
+import { useUI } from '@/contexts/UIProvider';
 
 export default function ForgotPasswordScreen() {
+  const navigation: any = useNavigation();
+  const ui = useUI();
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isEmailSent, setIsEmailSent] = useState(false);
@@ -28,14 +31,24 @@ export default function ForgotPasswordScreen() {
     if (!email.trim()) return;
     try {
       setIsLoading(true);
+      ui.showLoader('Sending Instructions...');
       const res = await requestPasswordReset(email.trim());
       setIsEmailSent(res.ok);
-      if (!res.ok) Alert.alert('Reset failed', 'Could not send reset instructions.');
+      if (!res.ok) ui.showError('Could not send reset instructions.', 'Reset failed');
     } catch (e) {
       setIsEmailSent(false);
-      Alert.alert('Reset failed', 'Could not send reset instructions.');
+      ui.showError('Could not send reset instructions.', 'Reset failed');
     } finally {
       setIsLoading(false);
+      ui.hideLoader();
+    }
+  };
+
+  const handleBack = () => {
+    if (navigation?.canGoBack?.()) {
+      navigation.goBack();
+    } else {
+      router.replace('/auth/login');
     }
   };
 
@@ -74,7 +87,7 @@ export default function ForgotPasswordScreen() {
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={Platform.OS === 'ios' ? 24 : 0}>
         <ScrollView contentContainerStyle={styles.scrollInner} keyboardShouldPersistTaps="handled">
         <Animated.View style={[styles.content, animatedStyle]}>
-          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+          <TouchableOpacity style={styles.backButton} onPress={handleBack}>
             <ArrowLeft size={24} color="#111111" />
           </TouchableOpacity>
 

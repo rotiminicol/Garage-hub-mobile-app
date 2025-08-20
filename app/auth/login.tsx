@@ -1,10 +1,11 @@
 import React, { useRef, useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, Image, Alert } from 'react-native';
 import Animated, { useSharedValue, withTiming, useAnimatedStyle } from 'react-native-reanimated';
-import { router } from 'expo-router';
+import { router, useNavigation } from 'expo-router';
 import { Mail, Lock, Eye, EyeOff, ArrowLeft } from 'lucide-react-native';
 import { login } from '@/services/auth';
 import Logo from '@/components/Logo';
+import { useUI } from '@/contexts/UIProvider';
 
 // Import social media icons
 const GoogleIcon = require('../../assets/google.png');
@@ -56,6 +57,8 @@ const InputField = React.memo(({
 ));
 
 export default function LoginScreen() {
+  const navigation: any = useNavigation();
+  const ui = useUI();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -82,15 +85,25 @@ export default function LoginScreen() {
     try {
       setErrorMessage(null);
       setIsLoading(true);
+      ui.showLoader('Signing In...');
       await login({ email: formData.email.trim(), password: formData.password });
       router.replace('/(tabs)/home');
     } catch (error: any) {
       const data = error?.response?.data;
       const message = (data && (data.message || data.error)) || error?.message || 'Login failed';
       setErrorMessage(message);
-      Alert.alert('Sign in failed', message);
+      ui.showError(message, 'Sign in failed');
     } finally {
       setIsLoading(false);
+      ui.hideLoader();
+    }
+  };
+
+  const handleBack = () => {
+    if (navigation?.canGoBack?.()) {
+      navigation.goBack();
+    } else {
+      router.replace('/onboarding');
     }
   };
 
@@ -104,7 +117,7 @@ export default function LoginScreen() {
         <ScrollView contentContainerStyle={styles.scrollInner} keyboardShouldPersistTaps="handled">
           <Animated.View style={[styles.content, animatedStyle]}>
             {/* Back Button */}
-            <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+            <TouchableOpacity style={styles.backButton} onPress={handleBack}>
               <ArrowLeft size={24} color="#111111" />
             </TouchableOpacity>
             

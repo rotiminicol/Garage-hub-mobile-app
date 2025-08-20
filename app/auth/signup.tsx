@@ -1,10 +1,11 @@
 import React, { useRef, useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Image, Alert } from 'react-native';
 import Animated, { useSharedValue, withTiming, useAnimatedStyle } from 'react-native-reanimated';
-import { router } from 'expo-router';
+import { router, useNavigation } from 'expo-router';
 import { User, Mail, Phone, Lock, Eye, EyeOff, ArrowLeft } from 'lucide-react-native';
 import { signup } from '@/services/auth';
 import Logo from '@/components/Logo';
+import { useUI } from '@/contexts/UIProvider';
 
 // Import social media icons
 const GoogleIcon = require('../../assets/google.png');
@@ -56,6 +57,8 @@ const InputField = React.memo(({
 ));
 
 export default function SignUpScreen() {
+  const navigation: any = useNavigation();
+  const ui = useUI();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -91,15 +94,25 @@ export default function SignUpScreen() {
     try {
       setErrorMessage(null);
       setIsLoading(true);
+      ui.showLoader('Creating Account...');
       await signup({ name: formData.name.trim(), full_name: formData.name.trim(), email: formData.email.trim(), password: formData.password } as any);
       router.push({ pathname: '/auth/verify-otp', params: { email: formData.email.trim() } as any });
     } catch (error: any) {
       const data = error?.response?.data;
       const message = (data && (data.message || data.error)) || error?.message || 'Signup failed';
       setErrorMessage(message);
-      Alert.alert('Sign up failed', message);
+      ui.showError(message, 'Sign up failed');
     } finally {
       setIsLoading(false);
+      ui.hideLoader();
+    }
+  };
+
+  const handleBack = () => {
+    if (navigation?.canGoBack?.()) {
+      navigation.goBack();
+    } else {
+      router.replace('/onboarding');
     }
   };
 
@@ -118,7 +131,7 @@ export default function SignUpScreen() {
           <ScrollView contentContainerStyle={styles.scrollInner} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
             {/* Header with Back Button and Logo */}
             <View style={styles.header}>
-              <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+              <TouchableOpacity style={styles.backButton} onPress={handleBack}>
                 <ArrowLeft size={24} color="#111111" />
               </TouchableOpacity>
               <View style={styles.logo}>

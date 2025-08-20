@@ -1,11 +1,13 @@
 import React, { useRef, useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, Alert } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
 import Animated, { useSharedValue, withTiming, useAnimatedStyle } from 'react-native-reanimated';
 import { router, useLocalSearchParams } from 'expo-router';
 import Logo from '@/components/Logo';
 import { verifyOtp } from '@/services/auth';
+import { useUI } from '@/contexts/UIProvider';
 
 export default function VerifyOTPScreen() {
+  const ui = useUI();
   const OTP_LENGTH = 4;
   const [code, setCode] = useState<string[]>(Array.from({ length: OTP_LENGTH }, () => ''));
   const inputs = Array.from({ length: OTP_LENGTH }, () => useRef<TextInput | null>(null));
@@ -41,7 +43,7 @@ export default function VerifyOTPScreen() {
     const pin = code.join('');
     if (TESTING_OTP_BYPASS) {
       setErrorMessage(null);
-      Alert.alert('Testing mode', 'OTP bypassed for demo. Any code is accepted.');
+      ui.showError('OTP bypassed for demo. Any code is accepted.', 'Testing mode');
       router.replace('/(tabs)/home');
       return;
     }
@@ -54,11 +56,11 @@ export default function VerifyOTPScreen() {
       } else {
         const msg = result.reason || 'Invalid or expired code';
         setErrorMessage(msg);
-        Alert.alert('Verification failed', msg);
+        ui.showError(msg, 'Verification failed');
       }
     } catch (e) {
       setErrorMessage('OTP verification error');
-      Alert.alert('Verification failed', 'OTP verification error');
+      ui.showError('OTP verification error', 'Verification failed');
     }
   };
 

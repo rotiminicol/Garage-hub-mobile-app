@@ -5,6 +5,8 @@ import { me } from '@/services/auth';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, withRepeat } from 'react-native-reanimated';
 import { Camera, ChevronRight } from 'lucide-react-native';
 import { router } from 'expo-router';
+import * as ImagePicker from 'expo-image-picker';
+import { useUI } from '@/contexts/UIProvider';
 
 const { width, height } = Dimensions.get('window');
 
@@ -65,6 +67,7 @@ function StarsLayer({ count = 80 }: { count?: number }) {
 }
 
 export default function ProfileScreen() {
+  const ui = useUI();
   const profile = {
     name: 'Sarah Cunningham',
     location: 'Vancouver',
@@ -118,6 +121,49 @@ export default function ProfileScreen() {
     }
   };
 
+  const [avatarUri, setAvatarUri] = React.useState(profile.avatar);
+
+  const pickImage = async () => {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        ui.showError('Please allow photo library access to upload a profile picture.', 'Permission required');
+        return;
+      }
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        setAvatarUri(result.assets[0].uri);
+      }
+    } catch (e) {
+      ui.showError('Could not open the image picker.', 'Error');
+    }
+  };
+
+  const takePhoto = async () => {
+    try {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== 'granted') {
+        ui.showError('Please allow camera access to take a profile picture.', 'Permission required');
+        return;
+      }
+      const result = await ImagePicker.launchCameraAsync({
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        setAvatarUri(result.assets[0].uri);
+      }
+    } catch (e) {
+      ui.showError('Could not open the camera.', 'Error');
+    }
+  };
+
   return (
     <View style={styles.container}>
       <StarsLayer />
@@ -130,10 +176,15 @@ export default function ProfileScreen() {
         <View style={styles.unifiedContainer}>
           <View style={styles.headerCard}>
             <View style={styles.avatarContainer}>
-              <Image source={{ uri: profile.avatar }} style={styles.headerAvatar} />
-              <TouchableOpacity style={styles.cameraButton}>
-                <Camera size={20} color="#FFFFFF" />
-              </TouchableOpacity>
+              <Image source={{ uri: avatarUri }} style={styles.headerAvatar} />
+              <View style={{ position: 'absolute', right: -8, bottom: -8, flexDirection: 'row', gap: 8 }}>
+                <TouchableOpacity style={styles.cameraButton} onPress={takePhoto}>
+                  <Camera size={20} color="#FFFFFF" />
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.cameraButton, { backgroundColor: '#6B7280' }]} onPress={pickImage}>
+                  <Camera size={20} color="#FFFFFF" />
+                </TouchableOpacity>
+              </View>
             </View>
             <View style={styles.headerTextContainer}>
               <Text style={styles.name}>{user?.full_name || user?.name || profile.name}</Text>
