@@ -1,9 +1,10 @@
 import React, { useRef, useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, Alert } from 'react-native';
 import Animated, { useSharedValue, withTiming, useAnimatedStyle } from 'react-native-reanimated';
 import { router } from 'expo-router';
 import { Mail, ArrowLeft } from 'lucide-react-native';
 import Logo from '@/components/Logo';
+import { requestPasswordReset } from '@/services/auth';
 
 export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState('');
@@ -24,12 +25,18 @@ export default function ForgotPasswordScreen() {
   }));
 
   const handleResetPassword = async () => {
-    setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
+    if (!email.trim()) return;
+    try {
+      setIsLoading(true);
+      const res = await requestPasswordReset(email.trim());
+      setIsEmailSent(res.ok);
+      if (!res.ok) Alert.alert('Reset failed', 'Could not send reset instructions.');
+    } catch (e) {
+      setIsEmailSent(false);
+      Alert.alert('Reset failed', 'Could not send reset instructions.');
+    } finally {
       setIsLoading(false);
-      setIsEmailSent(true);
-    }, 2000);
+    }
   };
 
   if (isEmailSent) {

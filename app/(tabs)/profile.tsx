@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Dimensions } from 'react-native';
 import Logo from '../../components/Logo';
+import { me } from '@/services/auth';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, withRepeat } from 'react-native-reanimated';
 import { Camera, ChevronRight } from 'lucide-react-native';
 import { router } from 'expo-router';
@@ -70,6 +71,19 @@ export default function ProfileScreen() {
     avatar: 'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=400'
   };
 
+  const [user, setUser] = React.useState<{ full_name?: string; name?: string; email?: string } | null>(null);
+
+  React.useEffect(() => {
+    (async () => {
+      try {
+        const u = await me();
+        setUser(u as any);
+      } catch (_) {
+        // ignore errors; keep placeholder
+      }
+    })();
+  }, []);
+
   const borderAnimation = useSharedValue(0);
   const animatedBorderStyle = useAnimatedStyle(() => ({
     transform: [{ rotate: `${borderAnimation.value}deg` }],
@@ -100,7 +114,7 @@ export default function ProfileScreen() {
 
   const handlePress = (route: string) => {
     if (route) {
-      router.push(route);
+      router.push(route as any);
     }
   };
 
@@ -122,8 +136,8 @@ export default function ProfileScreen() {
               </TouchableOpacity>
             </View>
             <View style={styles.headerTextContainer}>
-              <Text style={styles.name}>{profile.name}</Text>
-              <Text style={styles.location}>{profile.location}</Text>
+              <Text style={styles.name}>{user?.full_name || user?.name || profile.name}</Text>
+              <Text style={styles.location}>{user?.email || profile.location}</Text>
             </View>
           </View>
 

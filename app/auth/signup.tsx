@@ -1,8 +1,9 @@
 import React, { useRef, useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Image } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Image, Alert } from 'react-native';
 import Animated, { useSharedValue, withTiming, useAnimatedStyle } from 'react-native-reanimated';
 import { router } from 'expo-router';
 import { User, Mail, Phone, Lock, Eye, EyeOff, ArrowLeft } from 'lucide-react-native';
+import { signup } from '@/services/auth';
 import Logo from '@/components/Logo';
 
 // Import social media icons
@@ -65,6 +66,7 @@ export default function SignUpScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [hasAgreed, setHasAgreed] = useState(false);
   const nameRef = useRef<TextInput | null>(null);
   const emailRef = useRef<TextInput | null>(null);
@@ -85,12 +87,20 @@ export default function SignUpScreen() {
   }));
 
   const handleSignUp = async () => {
-    setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
+    if (!isFormValid) return;
+    try {
+      setErrorMessage(null);
+      setIsLoading(true);
+      await signup({ name: formData.name.trim(), full_name: formData.name.trim(), email: formData.email.trim(), password: formData.password } as any);
+      router.push({ pathname: '/auth/verify-otp', params: { email: formData.email.trim() } as any });
+    } catch (error: any) {
+      const data = error?.response?.data;
+      const message = (data && (data.message || data.error)) || error?.message || 'Signup failed';
+      setErrorMessage(message);
+      Alert.alert('Sign up failed', message);
+    } finally {
       setIsLoading(false);
-      router.push('/auth/verify-otp');
-    }, 2000);
+    }
   };
 
   
@@ -192,6 +202,10 @@ export default function SignUpScreen() {
                   {isLoading ? 'Creating Account...' : 'SIGN UP'}
                 </Text>
               </TouchableOpacity>
+
+              {errorMessage ? (
+                <Text style={styles.errorText}>{errorMessage}</Text>
+              ) : null}
 
               <View style={styles.dividerRow}>
                 <View style={styles.dividerLine} />
@@ -355,6 +369,11 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#ffffff',
     letterSpacing: 0.5,
+  },
+  errorText: {
+    color: '#b91c1c',
+    fontSize: 13,
+    marginTop: 4,
   },
   dividerRow: {
     flexDirection: 'row',

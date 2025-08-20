@@ -1,12 +1,16 @@
 import React, { useRef, useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, Alert } from 'react-native';
 import Animated, { useSharedValue, withTiming, useAnimatedStyle } from 'react-native-reanimated';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import Logo from '@/components/Logo';
+import { verifyOtp } from '@/services/auth';
 
 export default function VerifyOTPScreen() {
-  const [code, setCode] = useState(['', '', '', '']);
-  const inputs = [useRef<TextInput | null>(null), useRef<TextInput | null>(null), useRef<TextInput | null>(null), useRef<TextInput | null>(null)];
+  const OTP_LENGTH = 4;
+  const [code, setCode] = useState<string[]>(Array.from({ length: OTP_LENGTH }, () => ''));
+  const inputs = Array.from({ length: OTP_LENGTH }, () => useRef<TextInput | null>(null));
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const TESTING_OTP_BYPASS = true;
 
   const fadeAnim = useSharedValue(0);
   const slideAnim = useSharedValue(30);
@@ -26,16 +30,35 @@ export default function VerifyOTPScreen() {
       const next = [...code];
       next[idx] = text;
       setCode(next);
-      if (text && idx < 3) inputs[idx + 1].current?.focus();
+      if (text && idx < inputs.length - 1) inputs[idx + 1].current?.focus();
       if (!text && idx > 0) inputs[idx - 1].current?.focus();
     }
   };
 
-  const handleVerify = () => {
+  const params = useLocalSearchParams<{ email?: string; user_id?: string }>();
+
+  const handleVerify = async () => {
     const pin = code.join('');
-    if (pin.length === 4) {
-      // TODO: call API to verify OTP
+    if (TESTING_OTP_BYPASS) {
+      setErrorMessage(null);
+      Alert.alert('Testing mode', 'OTP bypassed for demo. Any code is accepted.');
       router.replace('/(tabs)/home');
+      return;
+    }
+    if (pin.length !== OTP_LENGTH) return;
+    try {
+      setErrorMessage(null);
+      const result = await verifyOtp({ otp_code: pin, email: params?.email, user_id: params?.user_id ? Number(params.user_id) : undefined });
+      if (result.ok) {
+        router.replace('/(tabs)/home');
+      } else {
+        const msg = result.reason || 'Invalid or expired code';
+        setErrorMessage(msg);
+        Alert.alert('Verification failed', msg);
+      }
+    } catch (e) {
+      setErrorMessage('OTP verification error');
+      Alert.alert('Verification failed', 'OTP verification error');
     }
   };
 
@@ -54,7 +77,8 @@ export default function VerifyOTPScreen() {
               <Logo size={40} />
             </View>
             <Text style={styles.title}>Verify your email</Text>
-            <Text style={styles.subtitle}>Enter the 4‑digit code sent to your email address.</Text>
+            <Text style={styles.subtitle}>Enter the code sent to your email address.</Text>
+            <Text style={styles.testingNote}>Testing mode is ON: any code will be accepted.</Text>
           </View>
 
           <View style={styles.pinRow}>
@@ -74,7 +98,11 @@ export default function VerifyOTPScreen() {
             ))}
           </View>
 
-          <TouchableOpacity style={[styles.primaryButton, !isComplete && styles.primaryButtonDisabled]} disabled={!isComplete} onPress={handleVerify}>
+          {errorMessage ? (
+            <Text style={styles.errorText}>{errorMessage}</Text>
+          ) : null}
+
+          <TouchableOpacity style={styles.primaryButton} onPress={handleVerify}>
             <Text style={styles.primaryButtonText}>VERIFY</Text>
           </TouchableOpacity>
 
@@ -108,4 +136,6 @@ const styles = StyleSheet.create({
   resendText: { fontSize: 14, color: '#111111', fontWeight: '600', textDecorationLine: 'underline' },
   backToLogin: { alignItems: 'center', marginTop: 8 },
   backToLoginText: { fontSize: 14, color: '#6b7280' },
+  errorText: { color: '#b91c1c', fontSize: 13, textAlign: 'center', marginBottom: 8 },
+  testingNote: { fontSize: 12, color: '#6b7280', textAlign: 'center', marginTop: 6 },
 });

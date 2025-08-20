@@ -1,8 +1,9 @@
 import React, { useRef, useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, Image } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, Image, Alert } from 'react-native';
 import Animated, { useSharedValue, withTiming, useAnimatedStyle } from 'react-native-reanimated';
 import { router } from 'expo-router';
 import { Mail, Lock, Eye, EyeOff, ArrowLeft } from 'lucide-react-native';
+import { login } from '@/services/auth';
 import Logo from '@/components/Logo';
 
 // Import social media icons
@@ -61,6 +62,7 @@ export default function LoginScreen() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const fadeAnim = useSharedValue(0);
   const slideAnim = useSharedValue(30);
@@ -76,12 +78,20 @@ export default function LoginScreen() {
   }));
 
   const handleLogin = async () => {
-    setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
+    if (!formData.email || !formData.password) return;
+    try {
+      setErrorMessage(null);
+      setIsLoading(true);
+      await login({ email: formData.email.trim(), password: formData.password });
       router.replace('/(tabs)/home');
-    }, 2000);
+    } catch (error: any) {
+      const data = error?.response?.data;
+      const message = (data && (data.message || data.error)) || error?.message || 'Login failed';
+      setErrorMessage(message);
+      Alert.alert('Sign in failed', message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   
@@ -142,6 +152,10 @@ export default function LoginScreen() {
               <TouchableOpacity style={styles.forgotPassword} onPress={() => router.push('/auth/forgot')}>
                 <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
               </TouchableOpacity>
+
+              {errorMessage ? (
+                <Text style={styles.errorText}>{errorMessage}</Text>
+              ) : null}
 
               <TouchableOpacity style={styles.loginButton} onPress={handleLogin} disabled={isLoading}>
                 <Text style={styles.loginButtonText}>
@@ -273,6 +287,11 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#ffffff',
     letterSpacing: 0.5,
+  },
+  errorText: {
+    color: '#b91c1c',
+    fontSize: 13,
+    marginTop: 4,
   },
   dividerRow: {
     flexDirection: 'row',

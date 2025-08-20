@@ -46,7 +46,7 @@ export default function OnboardingScreen() {
     }
   };
 
-  const skip = () => router.replace('/(tabs)/home');
+  const skip = () => router.replace('/auth/login');
 
   return (
     <SafeAreaView style={styles.container}>
