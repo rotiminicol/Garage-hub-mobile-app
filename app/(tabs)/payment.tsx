@@ -83,7 +83,7 @@ export default function PaymentScreen() {
           <Animated.View entering={FadeInDown.delay(200)} style={styles.form}>
             {stage === 'form' && (paymentMethod === 'card') && (
               <>
-                <Text style={styles.label}>Cardholder Name</Text>
+                <Text style={[styles.label, styles.firstLabel]}>Cardholder Name</Text>
                 <Animated.View entering={FadeInDown.delay(300)} style={styles.inputContainer}>
                   <TextInput
                     style={styles.input}
@@ -157,7 +157,7 @@ export default function PaymentScreen() {
             )}
             {stage === 'form' && (paymentMethod === 'bank') && (
               <>
-                <Text style={styles.label}>Account Name</Text>
+                <Text style={[styles.label, styles.firstLabel]}>Account Name</Text>
                 <Animated.View entering={FadeInDown.delay(300)} style={styles.detailContainer}>
                   <Text style={styles.detailText}>{bankDetails.accountName}</Text>
                   <TouchableOpacity
@@ -222,17 +222,42 @@ export default function PaymentScreen() {
               <View style={styles.processCard}>
                 <Text style={styles.processTitle}>Confirming your payment…</Text>
                 <Spinner />
-                <Text style={styles.processSub}>This may take a few seconds. You can simulate the outcome to test the UI.</Text>
-                <View style={styles.processRow}>
-                  <TouchableOpacity style={[styles.simBtn, styles.simSuccess]} onPress={() => setStage('success')}>
-                    <Text style={styles.simTextWhite}>Simulate Success</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={[styles.simBtn, styles.simDeclined]} onPress={() => setStage('declined')}>
-                    <Text style={styles.simTextDark}>Simulate Decline</Text>
-                  </TouchableOpacity>
-                </View>
-                <TouchableOpacity style={styles.linkBtn} onPress={() => setStage('form')}>
-                  <Text style={styles.linkText}>Back to payment form</Text>
+                <Text style={styles.processSub}>
+                  This may take a few seconds. We are verifying your payment details with our secure payment gateway. 
+                  Please do not close this window or navigate away while we process your transaction. 
+                  This process typically takes between 15-30 seconds depending on your bank's response time.
+                </Text>
+                <Text style={styles.processNote}>
+                  Note: For bank transfers, it may take up to 24 hours for the payment to reflect in our system. 
+                  You will receive a confirmation email once the payment is verified.
+                </Text>
+                
+                <Animated.View entering={FadeInDown.delay(400)} style={styles.simButtonsContainer}>
+                  <Text style={styles.simTitle}>Test Payment Result:</Text>
+                  <View style={styles.processRow}>
+                    <TouchableOpacity 
+                      style={[styles.simBtn, styles.simSuccess]} 
+                      onPress={() => setStage('success')}
+                      activeOpacity={0.8}
+                    >
+                      <Text style={styles.simTextWhite}>✓ Simulate Success</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                      style={[styles.simBtn, styles.simDeclined]} 
+                      onPress={() => setStage('declined')}
+                      activeOpacity={0.8}
+                    >
+                      <Text style={styles.simTextDark}>✗ Simulate Decline</Text>
+                    </TouchableOpacity>
+                  </View>
+                </Animated.View>
+                
+                <TouchableOpacity 
+                  style={styles.linkBtn} 
+                  onPress={() => setStage('form')}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.linkText}>← Back to payment form</Text>
                 </TouchableOpacity>
               </View>
             )}
@@ -266,7 +291,7 @@ export default function PaymentScreen() {
               <View style={styles.resultCard}>
                 <Image source={require('../../assets/error.png')} style={styles.resultImg} resizeMode="contain" />
                 <Text style={styles.resultTitle}>Payment Declined</Text>
-                <Text style={styles.resultSub}>Your payment couldn’t be verified. This could be due to insufficient funds, incorrect card information, or a temporary issue with your bank. Please try another method or try again with correct information. If the problem persists, contact your bank for assistance.</Text>
+                <Text style={styles.resultSub}>Your payment couldn't be verified. This could be due to insufficient funds, incorrect card information, or a temporary issue with your bank. Please try another method or try again with correct information. If the problem persists, contact your bank for assistance.</Text>
                 <TouchableOpacity style={styles.primaryCta} onPress={() => setStage('form')}>
                   <Text style={styles.primaryCtaText}>Try Again</Text>
                 </TouchableOpacity>
@@ -335,9 +360,12 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   form: { 
-    marginTop: 12, 
+    marginTop: 0, 
     flex: 1, 
-    justifyContent: 'center' 
+    justifyContent: 'flex-start' 
+  },
+  firstLabel: {
+    marginTop: 0,
   },
   label: {
     fontSize: 14,
@@ -346,6 +374,7 @@ const styles = StyleSheet.create({
     marginLeft: 4,
     fontWeight: '600',
     letterSpacing: 0.3,
+    marginTop: 4,
   },
   inputContainer: {
     flexDirection: 'row',
@@ -411,6 +440,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 4,
+    marginTop: 8,
   },
   payBtnInner: {
     backgroundColor: '#111111',
@@ -418,35 +448,124 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   payBtnText: { color: '#FFFFFF', fontWeight: '700', fontSize: 18, letterSpacing: 0.5 },
-  spinnerWrap: { alignItems: 'center', justifyContent: 'center', marginVertical: 16 },
+  spinnerWrap: { alignItems: 'center', justifyContent: 'center', marginVertical: 24 },
   spinner: {
-    width: 44, height: 44, borderRadius: 22, borderWidth: 4,
-    borderColor: '#E5E7EB', borderTopColor: '#111111'
+    width: 60, 
+    height: 60, 
+    borderRadius: 30, 
+    borderWidth: 5,
+    borderColor: '#E5E7EB', 
+    borderTopColor: '#111111'
   },
   processCard: {
     backgroundColor: '#FFFFFF', 
-    borderRadius: 12, 
-    padding: 24, 
+    borderRadius: 20, 
+    padding: 32, 
     borderWidth: 1, 
     borderColor: '#E5E7EB',
     shadowColor: '#000', 
-    shadowOffset: { width: 0, height: 2 }, 
-    shadowOpacity: 0.05, 
-    shadowRadius: 8, 
-    elevation: 2,
-    minHeight: height * 0.4,
+    shadowOffset: { width: 0, height: 6 }, 
+    shadowOpacity: 0.15, 
+    shadowRadius: 16, 
+    elevation: 8,
+    minHeight: height * 0.7,
     justifyContent: 'center',
   },
-  processTitle: { fontSize: 22, fontWeight: '800', color: '#111111', marginBottom: 16, textAlign: 'center' },
-  processSub: { color: '#6B7280', marginBottom: 24, textAlign: 'center', fontSize: 16, lineHeight: 24 },
-  processRow: { flexDirection: 'row', gap: 12, marginTop: 16 },
-  simBtn: { flex: 1, borderRadius: 10, alignItems: 'center', paddingVertical: 14 },
-  simSuccess: { backgroundColor: '#111111' },
-  simDeclined: { backgroundColor: '#F3F4F6', borderWidth: 1, borderColor: '#E5E7EB' },
-  simTextWhite: { color: '#FFFFFF', fontWeight: '700', fontSize: 16 },
-  simTextDark: { color: '#111111', fontWeight: '700', fontSize: 16 },
-  linkBtn: { alignSelf: 'center', paddingVertical: 16 },
-  linkText: { color: '#111111', fontWeight: '700', fontSize: 16 },
+  processTitle: { 
+    fontSize: 26, 
+    fontWeight: '800', 
+    color: '#111111', 
+    marginBottom: 24, 
+    textAlign: 'center' 
+  },
+  processSub: { 
+    color: '#6B7280', 
+    marginBottom: 20, 
+    textAlign: 'center', 
+    fontSize: 16, 
+    lineHeight: 24 
+  },
+  processNote: {
+    color: '#9CA3AF',
+    marginBottom: 32,
+    textAlign: 'center',
+    fontSize: 14,
+    lineHeight: 20,
+    fontStyle: 'italic'
+  },
+  simButtonsContainer: {
+    backgroundColor: '#F8F9FA',
+    borderRadius: 16,
+    padding: 24,
+    marginVertical: 24,
+    borderWidth: 1,
+    borderColor: '#E9ECEF',
+  },
+  simTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#495057',
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  processRow: { 
+    flexDirection: 'row', 
+    gap: 12,
+    justifyContent: 'space-between',
+  },
+  simBtn: { 
+    flex: 1, 
+    borderRadius: 12, 
+    alignItems: 'center', 
+    justifyContent: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    minHeight: 48,
+  },
+  simSuccess: { 
+    backgroundColor: '#28A745',
+    shadowColor: '#28A745',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  simDeclined: { 
+    backgroundColor: '#FFFFFF', 
+    borderWidth: 2, 
+    borderColor: '#DC3545',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  simTextWhite: { 
+    color: '#FFFFFF', 
+    fontWeight: '700', 
+    fontSize: 14,
+    textAlign: 'center',
+    letterSpacing: 0.3,
+  },
+  simTextDark: { 
+    color: '#DC3545', 
+    fontWeight: '700', 
+    fontSize: 14,
+    textAlign: 'center',
+    letterSpacing: 0.3,
+  },
+  linkBtn: { 
+    alignSelf: 'center', 
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  linkText: { 
+    color: '#6C757D', 
+    fontWeight: '600', 
+    fontSize: 16,
+    textDecorationLine: 'underline',
+  },
   resultCard: {
     backgroundColor: '#FFFFFF', 
     borderRadius: 16, 
@@ -465,7 +584,7 @@ const styles = StyleSheet.create({
     fontSize: 28, 
     fontWeight: '800', 
     color: '#111111', 
-    marginBottom: 12, 
+    marginBottom: 16, 
     textAlign: 'center' 
   },
   resultImg: { 
@@ -502,7 +621,12 @@ const styles = StyleSheet.create({
     alignItems: 'center', 
     paddingVertical: 18, 
     marginTop: 24,
-    marginBottom: 16 
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
   },
   primaryCtaText: { 
     color: '#FFFFFF', 

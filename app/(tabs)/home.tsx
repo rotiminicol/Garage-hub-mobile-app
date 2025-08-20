@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Image, SafeAreaView, Dimensions, FlatList } from 'react-native';
 import { Search, Filter, Bell, MapPin, Star, ChevronDown } from 'lucide-react-native';
 import { router } from 'expo-router';
@@ -12,6 +12,8 @@ export default function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState('Real Estate');
   const [showFilters, setShowFilters] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortOption, setSortOption] = useState('');
 
   const listingImages = [
     require('../../assets/listing-images/alex-suprun-AHnhdjyTNGM-unsplash.jpg'),
@@ -31,10 +33,24 @@ export default function HomePage() {
     return Array.from({ length: count }, (_, index) => {
       const imageIndex = index % listingImages.length;
       const bedroomCount = Math.floor(Math.random() * 3 + 2);
-      const category = categories[Math.floor(Math.random() * categories.length)];
+      const categoryIndex = Math.floor(Math.random() * categories.length);
+      const category = categories[categoryIndex];
       const price = section === 'exclusive' ? 
-        `${400 + Math.floor(Math.random() * 200)}` : 
-        `${200 + Math.floor(Math.random() * 150)}`;
+        400 + Math.floor(Math.random() * 200) : 
+        200 + Math.floor(Math.random() * 150);
+      
+      const locations = [
+        'Victoria Island, Lagos',
+        'Ikoyi, Lagos',
+        'Lekki, Lagos',
+        'Abuja Central',
+        'Garki, Abuja',
+        'Port Harcourt',
+        'Kano City',
+        'Ibadan',
+        'Enugu',
+        'Calabar'
+      ];
       
       return {
         id: `${section}-${index + 1}`,
@@ -42,20 +58,21 @@ export default function HomePage() {
         price: price,
         title: `Luxury ${bedroomCount} Bedroom ${category}`,
         description: `Modern ${bedroomCount} bedroom property with spacious living areas, premium amenities, and secure parking`,
-        rating: (Math.random() * 2 + 3).toFixed(1),
+        rating: parseFloat((Math.random() * 2 + 3).toFixed(1)),
         reviews: Math.floor(Math.random() * 100 + 50),
-        location: `Location ${index + 1}, City`,
+        location: locations[index % locations.length],
         size: `${200 + Math.floor(Math.random() * 300)} sq ft`,
         bedrooms: bedroomCount,
         bathrooms: Math.floor(Math.random() * 2 + 1),
         amenities: ['Wi-Fi', 'Parking', 'Security', 'Air Conditioning', 'Furnished'],
-        imageIndex: imageIndex // Store the image index for proper reference
+        imageIndex: imageIndex,
+        category: category
       };
     });
   };
 
-  const garageHubExclusive = generateListings(10, 'exclusive');
-  const hubListings = generateListings(10, 'hub');
+  const allGarageHubExclusive = generateListings(10, 'exclusive');
+  const allHubListings = generateListings(10, 'hub');
 
   const nigerianStates = [
     { state: 'Lagos', count: 150 },
@@ -74,13 +91,58 @@ export default function HomePage() {
     image: listingImages[index % listingImages.length],
     location: `${item.state}, Nigeria`,
     title: `Premium Storage in ${item.state}`,
-    price: `${100 + Math.floor(Math.random() * 200)}`,
-    rating: (Math.random() * 2 + 3).toFixed(1),
+    price: 100 + Math.floor(Math.random() * 200),
+    rating: parseFloat((Math.random() * 2 + 3).toFixed(1)),
     reviews: Math.floor(Math.random() * 100 + 50),
     description: `Secure storage facilities in ${item.state} with 24/7 access and premium features`,
     size: `${150 + Math.floor(Math.random() * 250)} sq ft`,
-    imageIndex: index % listingImages.length
+    imageIndex: index % listingImages.length,
+    category: 'Real Estate'
   }));
+
+  // Filter and sort listings based on search, category, and sort option
+  const filterListings = (listings) => {
+    let filtered = listings;
+
+    // Filter by category
+    if (selectedCategory !== 'Real Estate') {
+      filtered = filtered.filter(item => item.category === selectedCategory);
+    }
+
+    // Filter by search query
+    if (searchQuery.trim()) {
+      filtered = filtered.filter(item =>
+        item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.description.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    // Sort listings
+    switch (sortOption) {
+      case 'price-low':
+        filtered.sort((a, b) => a.price - b.price);
+        break;
+      case 'price-high':
+        filtered.sort((a, b) => b.price - a.price);
+        break;
+      case 'rating-high':
+        filtered.sort((a, b) => b.rating - a.rating);
+        break;
+      default:
+        break;
+    }
+
+    return filtered;
+  };
+
+  const garageHubExclusive = useMemo(() => filterListings(allGarageHubExclusive), [
+    allGarageHubExclusive, selectedCategory, searchQuery, sortOption
+  ]);
+
+  const hubListings = useMemo(() => filterListings(allHubListings), [
+    allHubListings, selectedCategory, searchQuery, sortOption
+  ]);
 
   const handleCardPress = (item) => {
     router.push({
@@ -104,6 +166,21 @@ export default function HomePage() {
 
   const handleExploreCardPress = (item) => {
     router.push('/search');
+  };
+
+  const handleSeeAllPress = () => {
+    router.push('/search');
+  };
+
+  const handleSortOptionPress = (option) => {
+    setSortOption(option);
+    setShowFilters(false);
+  };
+
+  const handleCategoryPress = (category) => {
+    setSelectedCategory(category);
+    // Reset search when changing categories for better UX
+    setSearchQuery('');
   };
 
   const renderListingItem = ({ item }) => (
@@ -213,35 +290,58 @@ export default function HomePage() {
               placeholder="Search by location..."
               placeholderTextColor="#6b7280"
               style={styles.searchInput}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
             />
           </View>
           
           <View style={styles.buttonsContainer}>
             <TouchableOpacity 
-              style={styles.filterButton} 
+              style={[styles.filterButton, showFilters && styles.activeButton]} 
               onPress={toggleFilters}
             >
-              <Filter size={20} color="#111111" />
+              <Filter size={20} color={showFilters ? "#ffffff" : "#111111"} />
               {showFilters && (
                 <View style={styles.dropdown}>
-                  <TouchableOpacity style={styles.dropdownRow}>
-                    <Text style={styles.dropdownText}>Price: Low to High</Text>
+                  <TouchableOpacity 
+                    style={[styles.dropdownRow, sortOption === 'price-low' && styles.activeDropdownRow]}
+                    onPress={() => handleSortOptionPress('price-low')}
+                  >
+                    <Text style={[styles.dropdownText, sortOption === 'price-low' && styles.activeDropdownText]}>
+                      Price: Low to High
+                    </Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={styles.dropdownRow}>
-                    <Text style={styles.dropdownText}>Price: High to Low</Text>
+                  <TouchableOpacity 
+                    style={[styles.dropdownRow, sortOption === 'price-high' && styles.activeDropdownRow]}
+                    onPress={() => handleSortOptionPress('price-high')}
+                  >
+                    <Text style={[styles.dropdownText, sortOption === 'price-high' && styles.activeDropdownText]}>
+                      Price: High to Low
+                    </Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={styles.dropdownRow}>
-                    <Text style={styles.dropdownText}>Rating: High to Low</Text>
+                  <TouchableOpacity 
+                    style={[styles.dropdownRow, sortOption === 'rating-high' && styles.activeDropdownRow]}
+                    onPress={() => handleSortOptionPress('rating-high')}
+                  >
+                    <Text style={[styles.dropdownText, sortOption === 'rating-high' && styles.activeDropdownText]}>
+                      Rating: High to Low
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={styles.dropdownRow}
+                    onPress={() => handleSortOptionPress('')}
+                  >
+                    <Text style={styles.dropdownText}>Clear Sorting</Text>
                   </TouchableOpacity>
                 </View>
               )}
             </TouchableOpacity>
             
             <TouchableOpacity 
-              style={styles.notificationButton}
+              style={[styles.notificationButton, showNotifications && styles.activeButton]}
               onPress={toggleNotifications}
             >
-              <Bell size={20} color="#111111" />
+              <Bell size={20} color={showNotifications ? "#ffffff" : "#111111"} />
               {showNotifications && (
                 <View style={styles.dropdown}>
                   <TouchableOpacity style={styles.dropdownRow}>
@@ -252,6 +352,15 @@ export default function HomePage() {
             </TouchableOpacity>
           </View>
         </View>
+
+        {/* Search Results Indicator */}
+        {searchQuery.trim() && (
+          <View style={styles.searchResultsContainer}>
+            <Text style={styles.searchResultsText}>
+              Showing results for "{searchQuery}" in {selectedCategory}
+            </Text>
+          </View>
+        )}
 
         {/* Category Tabs */}
         <ScrollView 
@@ -267,7 +376,7 @@ export default function HomePage() {
                 styles.categoryTab,
                 selectedCategory === category && styles.categoryTabActive
               ]}
-              onPress={() => setSelectedCategory(category)}
+              onPress={() => handleCategoryPress(category)}
             >
               <Text style={[
                 styles.categoryText,
@@ -283,36 +392,56 @@ export default function HomePage() {
         <View style={styles.sectionContainer}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Garage-Hub Exclusive</Text>
+            <Text style={styles.resultCount}>({garageHubExclusive.length} listings)</Text>
           </View>
-          <FlatList
-            data={garageHubExclusive}
-            renderItem={renderListingItem}
-            keyExtractor={(item) => item.id}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.carouselContent}
-            snapToInterval={windowWidth - 40}
-            decelerationRate="fast"
-          />
+          {garageHubExclusive.length > 0 ? (
+            <FlatList
+              data={garageHubExclusive}
+              renderItem={renderListingItem}
+              keyExtractor={(item) => item.id}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.carouselContent}
+              snapToInterval={windowWidth - 40}
+              decelerationRate="fast"
+            />
+          ) : (
+            <View style={styles.noResultsContainer}>
+              <Text style={styles.noResultsText}>
+                No {selectedCategory} listings found matching "{searchQuery}"
+              </Text>
+            </View>
+          )}
         </View>
 
         {/* Hub Grid */}
         <View style={styles.sectionContainer}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Hub</Text>
-            <TouchableOpacity>
-              <Text style={styles.seeAllText}>See All</Text>
-            </TouchableOpacity>
+            <View style={styles.sectionHeaderRight}>
+              <Text style={styles.resultCount}>({hubListings.length} listings)</Text>
+              <TouchableOpacity onPress={handleSeeAllPress}>
+                <Text style={styles.seeAllText}>See All</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-          <FlatList
-            data={hubListings}
-            renderItem={renderHubItem}
-            keyExtractor={(item) => item.id}
-            numColumns={2}
-            columnWrapperStyle={styles.columnWrapper}
-            showsVerticalScrollIndicator={false}
-            scrollEnabled={false}
-          />
+          {hubListings.length > 0 ? (
+            <FlatList
+              data={hubListings}
+              renderItem={renderHubItem}
+              keyExtractor={(item) => item.id}
+              numColumns={2}
+              columnWrapperStyle={styles.columnWrapper}
+              showsVerticalScrollIndicator={false}
+              scrollEnabled={false}
+            />
+          ) : (
+            <View style={styles.noResultsContainer}>
+              <Text style={styles.noResultsText}>
+                No {selectedCategory} listings found matching "{searchQuery}"
+              </Text>
+            </View>
+          )}
         </View>
 
         {/* Explore Carousel - Medium Size Section */}
@@ -331,6 +460,33 @@ export default function HomePage() {
             decelerationRate="fast"
           />
         </View>
+
+        {/* Footer */}
+        <View style={styles.footer}>
+          <View style={styles.footerContent}>
+            <View style={styles.footerBrand}>
+              <Image 
+                source={require('../../assets/house.png')} 
+                style={styles.footerLogo}
+                resizeMode="contain"
+              />
+              <Text style={styles.footerBrandText}>GarageHub</Text>
+            </View>
+            <View style={styles.footerLinks}>
+              <TouchableOpacity>
+                <Text style={styles.footerLink}>Privacy</Text>
+              </TouchableOpacity>
+              <Text style={styles.footerSeparator}>·</Text>
+              <TouchableOpacity>
+                <Text style={styles.footerLink}>Terms</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+          <Text style={styles.footerCopyright}>
+            © 2024 GarageHub. All rights reserved.
+          </Text>
+        </View>
+
         <View style={styles.bottomSpacer} />
       </ScrollView>
     </SafeAreaView>
@@ -404,6 +560,10 @@ const styles = StyleSheet.create({
     borderColor: '#E5E7EB',
     position: 'relative',
   },
+  activeButton: {
+    backgroundColor: '#1F2937',
+    borderColor: '#1F2937',
+  },
   dropdown: {
     position: 'absolute',
     top: 50,
@@ -426,9 +586,25 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#F3F4F6',
   },
+  activeDropdownRow: {
+    backgroundColor: '#F3F4F6',
+  },
   dropdownText: {
-    color: '##111827',
+    color: '#111827',
     fontSize: 14,
+  },
+  activeDropdownText: {
+    fontWeight: '600',
+    color: '#1F2937',
+  },
+  searchResultsContainer: {
+    paddingHorizontal: 20,
+    marginBottom: 16,
+  },
+  searchResultsText: {
+    fontSize: 14,
+    color: '#6B7280',
+    fontStyle: 'italic',
   },
   categoriesContainer: {
     marginBottom: 24,
@@ -468,15 +644,35 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginBottom: 16,
   },
+  sectionHeaderRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
   sectionTitle: {
     fontSize: 22,
     fontWeight: '700',
     color: '#111111',
   },
+  resultCount: {
+    fontSize: 12,
+    color: '#6B7280',
+    fontWeight: '500',
+  },
   seeAllText: {
     fontSize: 14,
     fontWeight: '600',
     color: '#6B7280',
+  },
+  noResultsContainer: {
+    paddingHorizontal: 20,
+    paddingVertical: 40,
+    alignItems: 'center',
+  },
+  noResultsText: {
+    fontSize: 16,
+    color: '#6B7280',
+    textAlign: 'center',
   },
   carouselContent: {
     paddingHorizontal: 20,
@@ -583,5 +779,53 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 'bold',
     color: '#fbbf24',
+  },
+  footer: {
+    marginTop: 40,
+    paddingTop: 24,
+    paddingHorizontal: 20,
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+    backgroundColor: '#F9FAFB',
+  },
+  footerContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  footerBrand: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  footerLogo: {
+    width: 24,
+    height: 24,
+  },
+  footerBrandText: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1F2937',
+  },
+  footerLinks: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  footerLink: {
+    fontSize: 14,
+    color: '#6B7280',
+    fontWeight: '500',
+  },
+  footerSeparator: {
+    fontSize: 14,
+    color: '#9CA3AF',
+  },
+  footerCopyright: {
+    fontSize: 12,
+    color: '#9CA3AF',
+    textAlign: 'center',
+    paddingBottom: 16,
   },
 });
