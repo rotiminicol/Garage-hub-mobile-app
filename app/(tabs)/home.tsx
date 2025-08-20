@@ -8,8 +8,8 @@ const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
 export default function HomePage() {
-  const categories = ['Real Estate', 'Apartment', 'House', 'Model'];
-  const [selectedCategory, setSelectedCategory] = useState('Real Estate');
+  const categories = ['All Storage', 'Small Garage', 'Large Garage', 'Secure Storage'];
+  const [selectedCategory, setSelectedCategory] = useState('All Storage');
   const [showFilters, setShowFilters] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -32,12 +32,12 @@ export default function HomePage() {
   const generateListings = (count, section) => {
     return Array.from({ length: count }, (_, index) => {
       const imageIndex = index % listingImages.length;
-      const bedroomCount = Math.floor(Math.random() * 3 + 2);
+      const storageSize = Math.floor(Math.random() * 100 + 50); // Storage size in sq ft
       const categoryIndex = Math.floor(Math.random() * categories.length);
       const category = categories[categoryIndex];
       const price = section === 'exclusive' ? 
-        400 + Math.floor(Math.random() * 200) : 
-        200 + Math.floor(Math.random() * 150);
+        100 + Math.floor(Math.random() * 150) : 
+        50 + Math.floor(Math.random() * 100);
       
       const locations = [
         'Victoria Island, Lagos',
@@ -56,15 +56,14 @@ export default function HomePage() {
         id: `${section}-${index + 1}`,
         image: listingImages[imageIndex],
         price: price,
-        title: `Luxury ${bedroomCount} Bedroom ${category}`,
-        description: `Modern ${bedroomCount} bedroom property with spacious living areas, premium amenities, and secure parking`,
+        title: `${category} Space ${storageSize} sq ft`,
+        description: `Secure ${category.toLowerCase()} with ${storageSize} sq ft, 24/7 access, and premium security features`,
         rating: parseFloat((Math.random() * 2 + 3).toFixed(1)),
         reviews: Math.floor(Math.random() * 100 + 50),
         location: locations[index % locations.length],
-        size: `${200 + Math.floor(Math.random() * 300)} sq ft`,
-        bedrooms: bedroomCount,
-        bathrooms: Math.floor(Math.random() * 2 + 1),
-        amenities: ['Wi-Fi', 'Parking', 'Security', 'Air Conditioning', 'Furnished'],
+        size: `${storageSize} sq ft`,
+        access: Math.random() > 0.5 ? '24/7 Access' : 'Scheduled Access',
+        amenities: ['Security Cameras', 'Climate Control', 'Lighting', 'Shelving', 'Lockable'],
         imageIndex: imageIndex,
         category: category
       };
@@ -90,14 +89,14 @@ export default function HomePage() {
     id: `explore-${index + 1}`,
     image: listingImages[index % listingImages.length],
     location: `${item.state}, Nigeria`,
-    title: `Premium Storage in ${item.state}`,
-    price: 100 + Math.floor(Math.random() * 200),
+    title: `Storage Space in ${item.state}`,
+    price: 50 + Math.floor(Math.random() * 100),
     rating: parseFloat((Math.random() * 2 + 3).toFixed(1)),
     reviews: Math.floor(Math.random() * 100 + 50),
     description: `Secure storage facilities in ${item.state} with 24/7 access and premium features`,
     size: `${150 + Math.floor(Math.random() * 250)} sq ft`,
     imageIndex: index % listingImages.length,
-    category: 'Real Estate'
+    category: 'All Storage'
   }));
 
   // Filter and sort listings based on search, category, and sort option
@@ -105,7 +104,7 @@ export default function HomePage() {
     let filtered = listings;
 
     // Filter by category
-    if (selectedCategory !== 'Real Estate') {
+    if (selectedCategory !== 'All Storage') {
       filtered = filtered.filter(item => item.category === selectedCategory);
     }
 
@@ -155,11 +154,10 @@ export default function HomePage() {
         rating: item.rating,
         description: item.description,
         size: item.size,
-        bedrooms: item.bedrooms || 2,
-        bathrooms: item.bathrooms || 1,
+        access: item.access || '24/7 Access',
         reviews: item.reviews,
         imagesIdx: JSON.stringify([item.imageIndex]),
-        amenities: JSON.stringify(item.amenities || ['Wi-Fi', 'Parking', 'Security'])
+        amenities: JSON.stringify(item.amenities || ['Security Cameras', 'Climate Control', 'Lighting'])
       }
     });
   };
@@ -179,7 +177,6 @@ export default function HomePage() {
 
   const handleCategoryPress = (category) => {
     setSelectedCategory(category);
-    // Reset search when changing categories for better UX
     setSearchQuery('');
   };
 
@@ -287,7 +284,7 @@ export default function HomePage() {
           <View style={styles.searchBar}>
             <Search size={20} color="#9ca3af" style={styles.searchIcon} />
             <TextInput
-              placeholder="Search by location..."
+              placeholder="Search storage by location..."
               placeholderTextColor="#6b7280"
               style={styles.searchInput}
               value={searchQuery}
@@ -684,7 +681,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     gap: 12,
   },
-  // Large cards for Garage-Hub Exclusive (about half the screen)
   largeGridItem: {
     width: windowWidth - 40,
     height: windowHeight * 0.45,
@@ -698,7 +694,6 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-  // Medium cards for Explore section
   mediumGridItem: {
     width: windowWidth * 0.7,
     height: windowHeight * 0.35,
@@ -712,7 +707,6 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-  // Regular cards for Hub section
   gridItem: {
     width: (windowWidth - 52) / 2,
     height: 240,
@@ -785,7 +779,7 @@ const styles = StyleSheet.create({
     paddingTop: 24,
     paddingHorizontal: 20,
     borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
+    borderColor: '#E5E7EB',
     backgroundColor: '#F9FAFB',
   },
   footerContent: {
