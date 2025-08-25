@@ -20,7 +20,7 @@ npm view expo-image-picker versions
 ```
 3. Install dependencies
 ```bash
-npm install expo-image-picke
+npm install expo-image-picker
 ```
 4. Install dependencies
 ```bash
