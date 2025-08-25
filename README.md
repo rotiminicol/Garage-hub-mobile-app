@@ -16,16 +16,28 @@ cd Garage-hub-mobile-app
 ```
 2. Install dependencies
 ```bash
+npm view expo-image-picker versions
+```
+3. Install dependencies
+```bash
+npm install expo-image-picke
+```
+4. Install dependencies
+```bash
+npm install expo-image-picker@14.7.1
+```
+5. Install dependencies
+```bash
 npm install
 ```
-3. Start the dev server
+6. Start the dev server
 ```bash
 # Either
 npm run dev
 # or
 npx expo start
 ```
-4. Open the app
+7. Open the app
 - Native: scan the QR code with Expo Go (Android) or Camera (iOS)
 - Web: press `w` in the Expo CLI to open in your browser
 
